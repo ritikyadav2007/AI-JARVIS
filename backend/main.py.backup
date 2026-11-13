@@ -1,0 +1,60 @@
+
+import logging
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+from core.ai_engine import ask_jarvis
+
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger("JARVIS")
+
+app = FastAPI(
+    title="JARVIS AI Assistant",
+    description="Advanced AI Personal Assistant for macOS",
+    version="1.0.0"
+)
+
+class ChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=10000)
+
+@app.get("/")
+def home():
+    return {
+        "assistant": "JARVIS",
+        "status": "online"
+    }
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "service": "JARVIS Backend"
+    }
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+    try:
+        answer = ask_jarvis(request.message)
+
+        return {
+            "assistant": "JARVIS",
+            "response": answer
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    except Exception:
+        logger.exception("JARVIS Gemini API request failed")
+
+        raise HTTPException(
+            status_code=502,
+            detail="Gemini API request failed. Check backend logs."
+        )
+
+
+

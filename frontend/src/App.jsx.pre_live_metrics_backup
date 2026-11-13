@@ -1,0 +1,252 @@
+import React, { useState, useEffect, useRef } from 'react';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Footer from './components/Footer';
+import TacticalCockpit from './components/TacticalCockpit';
+import MansionEnvironmental from './components/MansionEnvironmental';
+import AgentOperations from './components/AgentOperations';
+import AudioDesktopControl from './components/AudioDesktopControl';
+import { speakJarvis, stopSpeaking, createSpeechRecognizer } from './utils/speech';
+import { playTacticalClick, playPowerSurge, playAlertChime } from './utils/audioEffects';
+
+const BACKEND_URL = String.fromCharCode(104,116,116,112,58,47,47,49,50,55,46,48,46,48,46,49,58,56,48,48,48);
+
+export default function App() {
+  const [activeDirective, setActiveDirective] = useState('tactical');
+  const [backendStatus, setBackendStatus] = useState('Checking');
+  const [latency, setLatency] = useState(1.2);
+  const [loading, setLoading] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [jarvisSpeech, setJarvisSpeech] = useState(
+    'Sir, repulsor capacitance at 100%. Veronica pod is synchronized.'
+  );
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      text: 'Sir, repulsor capacitance at 100%. Veronica pod is synchronized. All Iron Legion units on standby.',
+      timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }),
+    },
+  ]);
+  const [tacticalState, setTacticalState] = useState({
+    veronicaActive: false,
+    arcStability: 99.8,
+  });
+
+  const speechRecognizerRef = useRef(null);
+
+  // Ping Backend Health & Latency
+  async function checkBackendHealth() {
+    const start = performance.now();
+    try {
+      const res = await fetch(`${BACKEND_URL}/health`);
+      const elapsed = (performance.now() - start).toFixed(1);
+      setLatency(elapsed);
+      if (res.ok) {
+        setBackendStatus('Online');
+      } else {
+        setBackendStatus('Offline');
+      }
+    } catch {
+      setBackendStatus('Offline');
+      setLatency(0.0);
+    }
+  }
+
+  useEffect(() => {
+    checkBackendHealth();
+    const interval = setInterval(checkBackendHealth, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Voice Recognition Setup
+  function toggleListening() {
+    if (isListening) {
+      if (speechRecognizerRef.current) {
+        try {
+          speechRecognizerRef.current.stop();
+        } catch (e) {
+          // ignore
+        }
+      }
+      setIsListening(false);
+      return;
+    }
+
+    const recognizer = createSpeechRecognizer(
+      (transcript) => {
+        setIsListening(false);
+        if (transcript && transcript.trim()) {
+          sendCommand(transcript);
+        }
+      },
+      (status) => {
+        setIsListening(status === 'listening');
+      },
+      () => {
+        setIsListening(false);
+      }
+    );
+
+    if (recognizer) {
+      speechRecognizerRef.current = recognizer;
+      try {
+        recognizer.start();
+      } catch (err) {
+        setIsListening(false);
+      }
+    } else {
+      alert('Speech recognition is not supported in this browser. Please use text input or Chrome.');
+    }
+  }
+
+  // Handle Tactical Action Side Effects
+  function applyActionEffects(action) {
+    if (!action) return;
+    const act = action.toLowerCase();
+    if (act === 'veronica') {
+      playAlertChime();
+      setTacticalState((prev) => ({ ...prev, veronicaActive: true }));
+    } else if (act === 'unibeam') {
+      playPowerSurge();
+    } else if (act === 'clean_slate') {
+      playAlertChime();
+    } else if (act.startsWith('formation_')) {
+      playTacticalClick();
+    }
+  }
+
+  // Send Command to Backend Gateway (Safe Gemini Call)
+  async function sendCommand(text) {
+    if (!text || !text.trim() || loading) return;
+    const cleanText = text.trim();
+    const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+    // Append User Message
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', text: cleanText, timestamp: timeStr },
+    ]);
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: cleanText }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || 'J.A.R.V.I.S. neural synchronization failed.');
+      }
+
+      const data = await response.json();
+      const reply = data.response;
+      const action = data.action;
+
+      setJarvisSpeech(reply);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: reply,
+          action: action,
+          timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }),
+        },
+      ]);
+
+      // Apply any tactical triggers
+      applyActionEffects(action);
+
+      // Speak Aloud via Speech Synthesis
+      speakJarvis(
+        reply,
+        () => setIsSpeaking(true),
+        () => setIsSpeaking(false)
+      );
+    } catch (err) {
+      const fallbackReply = `Sir, neural gateway unreachable: ${err.message}. Local emergency buffers active.`;
+      setJarvisSpeech(fallbackReply);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: fallbackReply,
+          timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }),
+        },
+      ]);
+      speakJarvis(
+        fallbackReply,
+        () => setIsSpeaking(true),
+        () => setIsSpeaking(false)
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="bg-surface font-body-md text-on-surface antialiased min-h-screen">
+      {/* Aside Left Navigation */}
+      <Sidebar
+        activeDirective={activeDirective}
+        setActiveDirective={setActiveDirective}
+        backendStatus={backendStatus}
+        arcStability={tacticalState.arcStability}
+      />
+
+      {/* Main View Area Offset by Sidebar (w-72) */}
+      <div className="pl-72 flex flex-col min-h-screen justify-between">
+        {/* Top Header */}
+        <Header
+          backendStatus={backendStatus}
+          isListening={isListening}
+          onToggleListening={toggleListening}
+          isSpeaking={isSpeaking}
+        />
+
+        {/* View Content Area */}
+        <main className="w-full pt-20 bg-surface min-h-[calc(100vh-3rem)] px-space-lg flex-1">
+          {activeDirective === 'tactical' && (
+            <TacticalCockpit
+              jarvisSpeech={jarvisSpeech}
+              isSpeaking={isSpeaking}
+              onSendCommand={sendCommand}
+              loading={loading}
+              isListening={isListening}
+              onToggleListening={toggleListening}
+              tacticalState={tacticalState}
+              setTacticalState={setTacticalState}
+            />
+          )}
+
+          {activeDirective === 'mansion' && (
+            <MansionEnvironmental onSendCommand={sendCommand} />
+          )}
+
+          {activeDirective === 'agent' && (
+            <AgentOperations
+              messages={messages}
+              onSendMessage={sendCommand}
+              loading={loading}
+              isListening={isListening}
+              onToggleListening={toggleListening}
+              onClearHistory={() => setMessages([])}
+            />
+          )}
+
+          {activeDirective === 'audio' && (
+            <AudioDesktopControl
+              onSendCommand={sendCommand}
+              isSpeaking={isSpeaking}
+            />
+          )}
+        </main>
+
+        {/* Bottom Status Footer */}
+        <Footer latency={latency} />
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,121 @@
+<!doctype html>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10131d" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>STARK INDUSTRIES // J.A.R.V.I.S. OS v7.4.2</title>
+
+    <!-- Google Fonts: Space Grotesk, JetBrains Mono, Geist & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+    <!-- Tailwind CDN with exact Stark Tactical HUD Design tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-container": "#00344e",
+              "on-error-container": "#ffdad6",
+              "primary-fixed-dim": "#00dbe9",
+              "error-container": "#93000a",
+              "surface-bright": "#363944",
+              "on-secondary-fixed": "#001e2f",
+              "surface-variant": "#313440",
+              "on-surface-variant": "#b9cacb",
+              "primary": "#dbfcff",
+              "on-primary-container": "#006970",
+              "on-tertiary": "#472a00",
+              "tertiary": "#fff3ea",
+              "background": "#10131d",
+              "on-primary-fixed": "#002022",
+              "on-tertiary-fixed-variant": "#653e00",
+              "on-secondary": "#00344d",
+              "tertiary-fixed-dim": "#ffb95f",
+              "surface": "#10131d",
+              "on-primary": "#00363a",
+              "error": "#ffb4ab",
+              "tertiary-container": "#ffd19c",
+              "secondary": "#89ceff",
+              "on-background": "#e0e2f1",
+              "outline-variant": "#3b494b",
+              "secondary-container": "#00a2e6",
+              "surface-dim": "#10131d",
+              "on-error": "#690005",
+              "outline": "#849495",
+              "surface-tint": "#00dbe9",
+              "surface-container-high": "#262a35",
+              "surface-container-highest": "#313440",
+              "secondary-fixed-dim": "#89ceff",
+              "inverse-surface": "#e0e2f1",
+              "tertiary-fixed": "#ffddb8",
+              "inverse-on-surface": "#2d303b",
+              "secondary-fixed": "#c9e6ff",
+              "inverse-primary": "#006970",
+              "surface-container": "#1c1f2a",
+              "surface-container-lowest": "#0a0e18",
+              "primary-fixed": "#7df4ff",
+              "on-primary-fixed-variant": "#004f54",
+              "primary-container": "#00f0ff",
+              "on-secondary-fixed-variant": "#004c6e",
+              "on-surface": "#e0e2f1",
+              "surface-container-low": "#181b26",
+              "on-tertiary-container": "#855300",
+              "on-tertiary-fixed": "#2a1700"
+            },
+            borderRadius: {
+              "DEFAULT": "0.125rem",
+              "lg": "0.25rem",
+              "xl": "0.5rem",
+              "full": "0.75rem"
+            },
+            spacing: {
+              "space-lg": "1.5rem",
+              "space-sm": "0.5rem",
+              "gutter": "1rem",
+              "space-xl": "2rem",
+              "margin": "1rem",
+              "space-md": "1rem",
+              "margin-desktop": "2.5rem",
+              "space-xs": "0.25rem",
+              "gutter-desktop": "1.5rem"
+            },
+            fontFamily: {
+              "headline-md": ["Space Grotesk", "sans-serif"],
+              "headline-lg-mobile": ["Space Grotesk", "sans-serif"],
+              "body-sm": ["Geist", "sans-serif"],
+              "body-lg": ["Geist", "sans-serif"],
+              "display-hero": ["Space Grotesk", "sans-serif"],
+              "body-md": ["Geist", "sans-serif"],
+              "headline-lg": ["Space Grotesk", "sans-serif"],
+              "label-code-xs": ["JetBrains Mono", "monospace"],
+              "title-sm": ["Space Grotesk", "sans-serif"],
+              "label-telemetry": ["JetBrains Mono", "monospace"],
+              "display-hero-mobile": ["Space Grotesk", "sans-serif"]
+            },
+            fontSize: {
+              "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+              "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
+              "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "400" }],
+              "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }],
+              "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" }],
+              "label-code-xs": ["11px", { lineHeight: "14px", letterSpacing: "0.1em", fontWeight: "500" }],
+              "title-sm": ["16px", { lineHeight: "22px", letterSpacing: "0.02em", fontWeight: "600" }],
+              "label-telemetry": ["13px", { lineHeight: "16px", letterSpacing: "0.08em", fontWeight: "500" }]
+            }
+          }
+        }
+      };
+    </script>
+  </head>
+  <body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
